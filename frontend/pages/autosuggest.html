@@ -9,20 +9,22 @@ body{margin:0;font:16px Arial,sans-serif;background:#fff}
 .top-nav{display:flex;justify-content:space-between;align-items:center;padding:15px 25px}
 .settings-link{font-size:24px;text-decoration:none;color:#333}
 .status-area{display:flex;gap:8px;align-items:center;color:#202124}
-.color-being{color:#0f0707}
+.color-being{color:#070505}
 .color-infinity{color:#00f}
 
-
+/* Wrapper keeps search bar and dropdown aligned */
 .search-wrapper{position:relative;display:inline-block;width:480px;max-width:90vw;text-align:left}
 
-
+/* Curved Search Bar */
 .search-container{display:flex;align-items:center;box-sizing:border-box;padding:8px 15px;border:1px solid #dfe1e5;border-radius:24px;background:#fff;box-shadow:0 1px 6px rgba(32,33,36,.28)}
 .lens-btn,.search-input{border:0;background:none}
 .lens-btn{cursor:pointer;font-size:18px;margin-right:8px;color:#5f6368}
 .search-input{width:100%;outline:0;font-size:16px}
 
-
+/* Dropdown shrinks automatically to fit exactly how many items exist */
 .dropdown-menu{display:none;position:absolute;top:100%;left:0;width:100%;margin-top:6px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.15);border:1px solid #ebebeb;overflow:hidden;z-index:100}
+
+/* Suggestion rows styling */
 .suggestion-item,.status-msg,.error-msg{display:flex;align-items:center;padding:12px 18px;font-size:14px;color:#202124;cursor:pointer}
 .suggestion-item:hover{background:#f1f3f4}
 .suggestion-text{flex-grow:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -56,7 +58,7 @@ body{margin:0;font:16px Arial,sans-serif;background:#fff}
 </main>
 
 <script>
-const inp = documensevet.getElementById('search-input'), menu = document.getElementById('dropdown-menu');
+const inp = document.getElementById('search-input'), menu = document.getElementById('dropdown-menu');
 let timer;
 
 const getArr = o => Array.isArray(o) ? o : !o || typeof o !== 'object' ? [] : ['data','suggestions','results','phrases','matches'].reduce((a,k) => a.length ? a : Array.isArray(o[k]) ? o[k] : [], []) || Object.values(o).find(Array.isArray) || [];
@@ -73,12 +75,12 @@ inp.addEventListener('input', function() {
     
     timer = setTimeout(async () => {
         try {
-           
+            // Requests up to 6 suggestions from your backend
             const res = await fetch(`https://autosuggest-backend.onrender.com/api/autosuggest?q=${encodeURIComponent(q)}&algorithm=brute&limit=6&weighted=false`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             
-            
+            // Renders exactly what the API returns (1, 2, 3, 4, 5, or 6 items)
             render(getArr(data).slice(0, 6));
         } catch (e) {
             menu.innerHTML = `<div class="error-msg">&#9888; API Error (${e.message})</div>`;
@@ -91,7 +93,7 @@ function render(list) {
         menu.innerHTML = `<div class="status-msg">No matching suggestions found</div>`;
         return;
     }
-    
+    // Creates exactly 1 box for each matching item found in the list
     menu.innerHTML = list.map(i => {
         let txt = typeof i === 'object' && i !== null ? (i.phrase || i.text || i.suggestion || i.word || Object.values(i)[0] || "") : i;
         return `<div class="suggestion-item" onclick="inp.value='${String(txt).replace(/'/g,"\\'")}';menu.style.display='none'"><span class="suggestion-text">${txt}</span></div>`;
